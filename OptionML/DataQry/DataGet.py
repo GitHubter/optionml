@@ -1,8 +1,13 @@
 from OptionML.VarBase import *
 import pandas as pd
 import numpy as np
+import re
+from datetime import *
 
 class DataGet:
+
+    def __init__(self):
+        self._option_info_df = pd.read_csv(r'F:\option\jQ\sh50\sh50option_info.csv')
 
     @staticmethod
     def get_underlying_price_ls(end_dt, count, freq=1):
@@ -53,5 +58,56 @@ class DataGet:
         if len(ann_var_ls):
             return ann_var_ls
 
+    @staticmethod
+    def get_option_history_price_by_count(option_id, end_dt, count):
+        option_filebasename = re.findall(r'\d+', option_id)[0] + 'XSHG.csv'
+        option_filepat = os.path.join(data_dir, option_filebasename)
+        option_df = pd.read_csv(option_filepat, index_col=0)
+        if not isinstance(end_dt, str):
+            end_dt = end_dt.strftime('%Y-%m-%d %H:%M:%S')
+        idx_end = np.where(option_df.index.values == end_dt)[0]
+        if not len(idx_end):
+            print('数据不存在')
+            return False
+        idx_end = idx_end[0]
+        if idx_end - count < 0:
+            print(f'此时长度不足,为{idx_end}')
+            idx_start = 0
+        else:
+            idx_start = idx_end - count
+        option_close = option_df[['close']].iloc[idx_start:idx_end+1]
+        return option_close
+
+    @staticmethod
+    def get_option_last_time(option_id, end_dt, count):
+        option_filebasename = re.findall(r'\d+', option_id)[0] + 'XSHG.csv'
+        option_filepat = os.path.join(data_dir, option_filebasename)
+        option_df = pd.read_csv(option_filepat, index_col=0)
+        if not isinstance(end_dt, str):
+            end_dt = end_dt.strftime('%Y-%m-%d %H:%M:%S')
+        idx_t = np.where(option_df.index.values <= end_dt)[0]
+        if not len(idx_t):
+            print('数据不存在')
+            return False
+        idx_t = idx_t[-count:]
+        last_time = (len(option_df) - idx_t) / (360 * 4 * 60)
+        ret_series = pd.Series(last_time, index=option_df.index.values[idx_t])
+        return ret_series
+
+
+    def get_option_info(self, option_id):
+        all_option_df = self._option_info_df
+        option_code = re.findall(r'\d+', option_id)[0] + '.XSHG'
+        ret_dict = {}
+        option_series = all_option_df[all_option_df['code'] == option_code].values[0]
+        ret_fields = ['exercise_price', '']
+        ret_dict['exercise_price'] = option_series['exercise']
+
+
+
+
+
+# end_dt = datetime(2018, 6, 26, 14, 30)
+# DataGet.get_option_history_price_by_count('10001167sss', end_dt=end_dt, count=500)
 
 

@@ -1,6 +1,8 @@
-from OptionML.DataQry.DataGet import *
+from OptionML.DataQry.DataGet import DataGet
+from OptionML.DataCal.BSModel import BSModel
 from datetime import *
-import random
+import numpy as np
+import pandas as pd
 
 dt = datetime(2020, 5, 25, 14, 15, 0)
 sample_size = 2000
@@ -35,5 +37,16 @@ for i in range(sample_size):
     sigma = var * T ** 0.5
     sim_df['sim_lnS'].iloc[i] = np.random.normal(u, sigma, 1)[0]
 
+#期权BS定价模型
+
+##取得期权价格历史数据
+end_dt = datetime(2018, 6, 26, 14, 30)
+option_id = '10001167'
+count = 500
+close_df = DataGet.get_option_history_price_by_count(option_id, end_dt=end_dt, count=count)
+last_time = DataGet.get_option_last_time(option_id, end_dt=end_dt, count=count)
+S = DataGet.get_underlying_price_ls(end_dt=end_dt, count=count)
+iv = BSModel.GetImpliedVolatility(3, 3, 0.06, 0.05, 0.03, 'call')
+for S, Price, T in zip()
 
 
