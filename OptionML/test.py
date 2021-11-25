@@ -43,10 +43,23 @@ for i in range(sample_size):
 end_dt = datetime(2018, 6, 26, 14, 30)
 option_id = '10001167'
 count = 500
-close_df = DataGet.get_option_history_price_by_count(option_id, end_dt=end_dt, count=count)
-last_time = DataGet.get_option_last_time(option_id, end_dt=end_dt, count=count)
-S = DataGet.get_underlying_price_ls(end_dt=end_dt, count=count)
-iv = BSModel.GetImpliedVolatility(3, 3, 0.06, 0.05, 0.03, 'call')
-for S, Price, T in zip()
+
+close_ls = DataGet.get_option_history_price_by_count(option_id, end_dt=end_dt, count=count)
+last_time_ls = DataGet.get_option_last_time(option_id, end_dt=end_dt, count=count)
+S_ls = DataGet.get_underlying_price_ls(end_dt=end_dt, count=count)
+dataget = DataGet()
+option_info_dict = dataget.get_option_info(option_id=option_id)
+option_class = option_info_dict['option_class']
+K = option_info_dict['exercise_price']
+# iv = BSModel.GetImpliedVolatility(3, 3, 0.06, 0.05, 0.03, 'call')
+r = 0.02
+iv_df = pd.DataFrame([], index=close_ls.index.values)
+for S, Price, T in zip(S_ls, close_ls, last_time_ls):
+    iv = BSModel.GetImpliedVolatility(S, K, Price, T, r, option_class)
+    print(Price, iv)
+
+
+
+
 
 

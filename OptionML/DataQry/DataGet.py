@@ -7,7 +7,7 @@ from datetime import *
 class DataGet:
 
     def __init__(self):
-        self._option_info_df = pd.read_csv(r'F:\option\jQ\sh50\sh50option_info.csv')
+        self._option_info_df = pd.read_csv(option_info_file)
 
     @staticmethod
     def get_underlying_price_ls(end_dt, count, freq=1):
@@ -75,7 +75,7 @@ class DataGet:
             idx_start = 0
         else:
             idx_start = idx_end - count
-        option_close = option_df[['close']].iloc[idx_start:idx_end+1]
+        option_close = option_df['close'].iloc[idx_start:idx_end+1]
         return option_close
 
     @staticmethod
@@ -99,9 +99,16 @@ class DataGet:
         all_option_df = self._option_info_df
         option_code = re.findall(r'\d+', option_id)[0] + '.XSHG'
         ret_dict = {}
-        option_series = all_option_df[all_option_df['code'] == option_code].values[0]
-        ret_fields = ['exercise_price', '']
-        ret_dict['exercise_price'] = option_series['exercise']
+        option_series = all_option_df[all_option_df['code'] == option_code].iloc[0]
+        ret_fields = ['exercise_price']
+
+        for field in ret_fields:
+            ret_dict[field] = option_series[field]
+        ret_dict['option_id'] = option_code
+        contract_type_dict = {'CO': 'call', 'PO': 'put'}
+        ret_dict['option_class'] = contract_type_dict[option_series['contract_type']]
+        return ret_dict
+
 
 
 
@@ -109,5 +116,6 @@ class DataGet:
 
 # end_dt = datetime(2018, 6, 26, 14, 30)
 # DataGet.get_option_history_price_by_count('10001167sss', end_dt=end_dt, count=500)
-
+# dataget =  DataGet()
+# dataget.get_option_info('10001167')
 
